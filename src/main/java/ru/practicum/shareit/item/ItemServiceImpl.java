@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,9 +36,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(ItemDto dto, long itemId, long userId) {
         ItemDto itemUpdate = getItemById(itemId, userId); // проверка наличия пользователя с заданным id и проверка наличия предмета в базе
         if (itemUpdate.getOwner() != 0) {
-            if (itemUpdate.getOwner() != userId) { // проверка прав пользователя
-                throw new WrongAccessException("Недостаточно прав для редактирования");
-            }
+            accessCheck(itemUpdate.getOwner(), userId);
         }
         if (dto.getName() != null) {
             itemUpdate.setName(dto.getName());
@@ -45,7 +44,10 @@ public class ItemServiceImpl implements ItemService {
         if (dto.getDescription() != null) {
             itemUpdate.setDescription(dto.getDescription());
         }
-        if (dto.getAvailable() != false) {
+        if (dto.getAvailable() != null) {
+            itemUpdate.setAvailable(dto.getAvailable());
+        }
+        if (dto.getAvailable() != null) {
             itemUpdate.setAvailable(dto.getAvailable());
         }
         items.put(itemId, ItemMapper.toItem(itemUpdate));
@@ -72,20 +74,22 @@ public class ItemServiceImpl implements ItemService {
 
     public Collection<ItemDto> findItem(String text, long userId) {
         userService.getUserById(userId); // проверка наличия пользователя с заданным id
+        if (text.isBlank()) {
+            return new ArrayList<ItemDto>();
+        }
         String textInLowerCase = text.toLowerCase();
         return items.values()
                 .stream()
-                .filter(item -> item.getName().indexOf(textInLowerCase) > 0 || item.getDescription().indexOf(textInLowerCase) > 0)
+                .filter(item -> item.getName().toLowerCase().contains(textInLowerCase) || item.getDescription().toLowerCase().contains(textInLowerCase))
+                .filter(item -> item.getAvailable())
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     public void deleteItem(long id, long userId) {
         userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        getItemById(id, userId); // проверка наличия предмета в базе
-        if (getItemById(id, userId).getOwner() != userId) { // проверка прав пользователя
-            throw new WrongAccessException("Недостаточно прав для редактирования");
-        }
+        ItemDto dto = getItemById(id, userId); // проверка наличия предмета в базе
+        accessCheck(dto.getOwner(), userId);
         items.remove(id);
     }
 
@@ -95,5 +99,11 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    public void accessCheck(long userIdFromItem, long userIdFromRequest) {
+        if (userIdFromItem != userIdFromRequest) {
+            throw new WrongAccessException("Недостаточно прав для редактирования");
+        }
     }
 }

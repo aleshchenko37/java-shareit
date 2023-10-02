@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.transfer.*;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -19,12 +18,8 @@ public class ItemDto {
     private String name;
     @NotBlank(groups = {New.class, ExistUpdateName.class, ExistUpdateNameEmailDescAvail.class, ExistUpdateAvailable.class})
     private String description;
-    @AssertTrue(groups = {New.class, ExistUpdateNameEmailDescAvail.class})
-    private boolean available;
+    @NotNull(groups = {New.class, ExistUpdateNameEmailDescAvail.class})
+    private Boolean available; // класс-обертка может быть null
     private long owner;
     private long request;
-
-    public boolean getAvailable() {
-        return available;
-    }
 }

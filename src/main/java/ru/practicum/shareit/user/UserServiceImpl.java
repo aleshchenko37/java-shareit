@@ -27,13 +27,12 @@ public class UserServiceImpl implements UserService {
 
     public UserDto updateUser(UserDto dto, long userId) {
         UserDto userUpdate = getUserById(userId); // тут же проверка наличия пользователя с заданным id
-        if (dto.getName() == null) {
+        if (dto.getName() != null) {
+            userUpdate.setName(dto.getName());
+        }
+        if (dto.getEmail() != null) {
             checkEmail(dto.getEmail());
-            userUpdate.setEmail(dto.getEmail());
-        } else if (dto.getEmail() == null) {
-            userUpdate.setName(dto.getName());
-        } else {
-            userUpdate.setName(dto.getName());
+            emails.remove(userUpdate.getEmail()); // удаляем старый email
             userUpdate.setEmail(dto.getEmail());
         }
         users.put(userId, UserMapper.toUser(userUpdate));

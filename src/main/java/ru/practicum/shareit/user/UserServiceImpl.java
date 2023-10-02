@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final Map<Long, User> users = new HashMap<>();
     private long nextId = 1;
     private final List<String> emails = new ArrayList<>();
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService{
         if (dto.getName() == null) {
             checkEmail(dto.getEmail());
             userUpdate.setEmail(dto.getEmail());
-        } else if (dto.getEmail() == null){
+        } else if (dto.getEmail() == null) {
             userUpdate.setName(dto.getName());
         } else {
             userUpdate.setName(dto.getName());
@@ -62,8 +62,8 @@ public class UserServiceImpl implements UserService{
     }
 
     private void checkEmail(String email) {
-       if (emails.contains(email)) {
-           throw new ValidationException("Пользователь с email " + email + " уже зарегистрирован");
-       }
+        if (emails.contains(email)) {
+            throw new ValidationException("Пользователь с email " + email + " уже зарегистрирован");
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.transfer.Exist;
 import ru.practicum.shareit.transfer.ExistUpdateEmail;
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
+@Builder
 public class UserDto {
     @NotNull(groups = Exist.class) // Exist.class - применимо для обновляемых объектов User
     private long id;

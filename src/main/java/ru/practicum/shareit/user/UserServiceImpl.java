@@ -2,67 +2,56 @@ package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Component
 public class UserServiceImpl implements UserService {
-    private final Map<Long, User> users = new HashMap<>();
-    private long nextId = 1;
-    private final List<String> emails = new ArrayList<>();
+    private final UserRepository repository;
+
+    public UserServiceImpl(UserRepository repository) {
+        this.repository = repository;
+    }
 
     public UserDto createUser(UserDto dto) {
-        checkEmail(dto.getEmail());
-        dto.setId(nextId);
-        nextId++;
         User user = UserMapper.toUser(dto);
-        users.put(user.getId(), user);
-        emails.add(user.getEmail());
+        repository.save(UserMapper.toUser(dto));
         return dto;
     }
 
     public UserDto updateUser(UserDto dto, long userId) {
-        UserDto userUpdate = getUserById(userId); // тут же проверка наличия пользователя с заданным id
+        User user = repository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
+        user.setId(userId);
         if (dto.getName() != null) {
-            userUpdate.setName(dto.getName());
+            user.setName(dto.getName());
         }
         if (dto.getEmail() != null) {
-            checkEmail(dto.getEmail());
-            emails.remove(userUpdate.getEmail()); // удаляем старый email
-            userUpdate.setEmail(dto.getEmail());
+            user.setEmail(dto.getEmail());
         }
-        users.put(userId, UserMapper.toUser(userUpdate));
-        return userUpdate;
+        repository.save(user);
+        return UserMapper.toUserDto(user);
     }
 
     public void deleteUser(long id) {
-        UserDto dto = getUserById(id); // тут же проверка наличия пользователя с заданным id
-        emails.remove(dto.getEmail());
-        users.remove(id);
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+        } else {
+            throw new IllegalStateException("User not found");
+        }
     }
 
     public Collection<UserDto> getAllUsers() {
-        return users.values()
+        return repository.findAll()
                 .stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     public UserDto getUserById(long id) {
-        if (users.containsKey(id)) {
-            return UserMapper.toUserDto(users.get(id));
-        } else {
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-    }
-
-    private void checkEmail(String email) {
-        if (emails.contains(email)) {
-            throw new ValidationException("Пользователь с email " + email + " уже зарегистрирован");
-        }
+        User user = repository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден."));
+        return UserMapper.toUserDto(user);
     }
 }

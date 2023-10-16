@@ -28,17 +28,17 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public ItemDto getItemById(@PathVariable long itemId, @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
         return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public Collection<ItemDto> getAllUsersItems(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
         return itemService.getAllUsersItems(userId);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> findItem(@RequestParam String text, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public Collection<ItemDto> findItem(@RequestParam String text, @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
         return itemService.findItem(text, userId);
     }
 }

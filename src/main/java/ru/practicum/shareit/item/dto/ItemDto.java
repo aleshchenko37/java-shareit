@@ -14,14 +14,12 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
-    @NotNull(groups = Exist.class) // Exist.class - применимо для обновляемых объектов Item
-    private long id;
     @NotBlank(groups = {New.class, ExistUpdateDescription.class, ExistUpdateNameEmailDescAvail.class, ExistUpdateAvailable.class}) // New.class - применимо для новых объектов Item
     private String name;
     @NotBlank(groups = {New.class, ExistUpdateName.class, ExistUpdateNameEmailDescAvail.class, ExistUpdateAvailable.class})
     private String description;
     @NotNull(groups = {New.class, ExistUpdateNameEmailDescAvail.class})
     private Boolean available; // класс-обертка может быть null
-    private long owner;
-    private long request;
+    private Long userId;
+    //private long request;
 }

@@ -5,103 +5,107 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.WrongAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 public class ItemServiceImpl implements ItemService {
-    UserService userService;
-    private final Map<Long, Item> items = new HashMap<>();
-    private long nextId = 1;
+    UserRepository userRepository;
+    ItemRepository itemRepository;
 
-    public ItemServiceImpl(UserService userService) {
-        this.userService = userService;
+    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository) {
+        this.userRepository = userRepository;
+        this.itemRepository = itemRepository;
     }
 
     public ItemDto createItem(ItemDto dto, long userId) {
-        userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        dto.setOwner(userId); // пользователь, добавивший предмет, становится его владельцем
-        dto.setId(nextId);
-        nextId++;
-        Item item = ItemMapper.toItem(dto);
-        items.put(item.getId(), item);
-        return ItemMapper.toItemDto(item);
+        userExistingCheck(userId);
+        dto.setUserId(userId);
+        Item item = ItemMapper.toItem(dto, userRepository.findById(userId).get());
+        itemRepository.save(item);
+        return dto;
     }
 
     public ItemDto updateItem(ItemDto dto, long itemId, long userId) {
-        ItemDto itemUpdate = getItemById(itemId, userId); // проверка наличия пользователя с заданным id и проверка наличия предмета в базе
-        if (itemUpdate.getOwner() != 0) {
-            accessCheck(itemUpdate.getOwner(), userId);
-        }
+        userExistingCheck(userId);
+        itemExistingCheck(itemId);
+        dto.setUserId(userId);
+        Item item = itemRepository.findById(itemId).get();
+        accessCheck(item.getUser().getId(), userId);
         if (dto.getName() != null) {
-            itemUpdate.setName(dto.getName());
+            item.setName(dto.getName());
         }
         if (dto.getDescription() != null) {
-            itemUpdate.setDescription(dto.getDescription());
+            item.setDescription(dto.getDescription());
         }
         if (dto.getAvailable() != null) {
-            itemUpdate.setAvailable(dto.getAvailable());
+            item.setIsAvailable(dto.getAvailable());
         }
-        if (dto.getAvailable() != null) {
-            itemUpdate.setAvailable(dto.getAvailable());
-        }
-        items.put(itemId, ItemMapper.toItem(itemUpdate));
-        return itemUpdate;
+        itemRepository.save(item);
+        return ItemMapper.toItemDto(item);
     }
 
-    public ItemDto getItemById(long id, long userId) {
-        userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        if (items.containsKey(id)) {
-            return ItemMapper.toItemDto(items.get(id));
-        } else {
+    public void deleteItem(long itemId, long userId) {
+        userExistingCheck(userId);
+        itemExistingCheck(itemId);
+        Item item = itemRepository.findById(itemId).get();
+        accessCheck(item.getUser().getId(), userId);
+        itemRepository.deleteById(itemId);
+    }
+
+    public ItemDto getItemById(long itemId, Long userId) {
+        itemExistingCheck(itemId);
+        Item item = itemRepository.findById(itemId).get();
+        return ItemMapper.toItemDto(item);
+    }
+
+    public Collection<ItemDto> getAllItems() {
+        return itemRepository.findAll()
+                .stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<ItemDto> getAllUsersItems(Long userId) {
+        if (userId == null) {
+            return itemRepository.findAll()
+                    .stream()
+                    .map(ItemMapper::toItemDto)
+                    .collect(Collectors.toList());
+        }
+        userExistingCheck(userId);
+        return itemRepository.findByUserId(userId)
+                .stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<ItemDto> findItem(String text, Long userId) {
+        if (text.isBlank()) {
+            return new ArrayList<ItemDto>();
+        }
+        return itemRepository.findByNameOrDescriptionContainingIgnoreCase(text)
+                .stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+    }
+
+    private void userExistingCheck(long id) {
+        if (userRepository.existsById(id) == false) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
+    }
+
+    private void itemExistingCheck(long id) {
+        if (itemRepository.existsById(id) == false) {
             throw new NotFoundException("Предмет с id " + id + " не найден");
         }
     }
 
-    public Collection<ItemDto> getAllUsersItems(long userId) {
-        userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        return items.values()
-                .stream()
-                .filter(item -> item.getOwner() == userId)
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    public Collection<ItemDto> findItem(String text, long userId) {
-        userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        if (text.isBlank()) {
-            return new ArrayList<ItemDto>();
-        }
-        String textInLowerCase = text.toLowerCase();
-        return items.values()
-                .stream()
-                .filter(item -> item.getName().toLowerCase().contains(textInLowerCase) || item.getDescription().toLowerCase().contains(textInLowerCase))
-                .filter(item -> item.getAvailable())
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    public void deleteItem(long id, long userId) {
-        userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        ItemDto dto = getItemById(id, userId); // проверка наличия предмета в базе
-        accessCheck(dto.getOwner(), userId);
-        items.remove(id);
-    }
-
-    public Collection<ItemDto> getAllItems(long userId) {
-        userService.getUserById(userId); // проверка наличия пользователя с заданным id
-        return items.values()
-                .stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    public void accessCheck(long userIdFromItem, long userIdFromRequest) {
+    private void accessCheck(long userIdFromItem, long userIdFromRequest) {
         if (userIdFromItem != userIdFromRequest) {
             throw new WrongAccessException("Недостаточно прав для редактирования");
         }

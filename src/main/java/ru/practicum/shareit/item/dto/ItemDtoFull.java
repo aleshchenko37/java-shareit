@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDtoForItem;
-import ru.practicum.shareit.comment.CommentDto;
+import ru.practicum.shareit.comment.dto.CommentDtoFull;
 import ru.practicum.shareit.transfer.*;
 
 import javax.validation.constraints.NotBlank;
@@ -27,6 +27,6 @@ public class ItemDtoFull {
     private Long userId;
     private BookingDtoForItem lastBooking;
     private BookingDtoForItem nextBooking;
-    Set<CommentDto> comments;
+    Set<CommentDtoFull> comments;
 
 }

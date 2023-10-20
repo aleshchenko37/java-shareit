@@ -17,7 +17,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto createUser(UserDto dto) {
-        //checkIfEmailIsUnique(dto.getEmail());
         User user = repository.save(UserMapper.toUser(dto));
         return UserMapper.toUserDto(user);
     }

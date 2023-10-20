@@ -22,5 +22,4 @@ public class ItemDto {
     @NotNull(groups = {New.class, ExistUpdateNameEmailDescAvail.class})
     private Boolean available; // класс-обертка может быть null
     private Long userId;
-    //private long request;
 }

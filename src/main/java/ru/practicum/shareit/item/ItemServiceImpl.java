@@ -4,6 +4,11 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.comment.CommentMapper;
+import ru.practicum.shareit.comment.CommentRepository;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.dto.CommentDtoFull;
+import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.WrongAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -14,6 +19,7 @@ import ru.practicum.shareit.user.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,11 +27,13 @@ public class ItemServiceImpl implements ItemService {
     UserRepository userRepository;
     ItemRepository itemRepository;
     BookingRepository bookingRepository;
+    CommentRepository commentRepository;
 
-    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository) {
+    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     public ItemDto createItem(ItemDto dto, long userId) {
@@ -64,14 +72,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDtoFull getItemById(long itemId, Long userId) {
+        userExistingCheck(userId);
         itemExistingCheck(itemId);
         Item item = itemRepository.findById(itemId).get();
-        if (userId == item.getUser().getId()) {
-            LocalDateTime localDateTime = LocalDateTime.now();
-            Booking lastBooking = bookingRepository.getFirstByItemIdAndStatusNotAndEndBeforeOrderByEnd(itemId, Status.REJECTED, localDateTime);
-            Booking nextBooking = bookingRepository.getTopByItemIdAndStatusNotAndStartAfterOrderByStart(itemId, Status.REJECTED, localDateTime);
-            return ItemMapper.toItemDtoFull(item, lastBooking, nextBooking);
-        } else return ItemMapper.toItemDtoFull(item, null, null);
+        Set<CommentDtoFull> comments = getComments(itemId);
+        if (userId.equals(item.getUser().getId())) {
+            Booking lastBooking = bookingRepository.getFirstByItemIdAndStatusNotAndEndBeforeOrderByEndDesc(itemId, Status.REJECTED, LocalDateTime.now());
+            Booking nextBooking = bookingRepository.getFirstByItemIdAndStatusNotAndStartAfterOrderByStart(itemId, Status.REJECTED, LocalDateTime.now());
+            return ItemMapper.toItemDtoFull(item, lastBooking, nextBooking, comments);
+        } else return ItemMapper.toItemDtoFull(item, null, null, comments);
     }
 
     public Collection<ItemDto> getAllItems() {
@@ -85,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
         if (userId == null) {
             return itemRepository.findAll()
                     .stream()
-                    .map(item -> ItemMapper.toItemDtoFull(item, null, null))
+                    .map(item -> ItemMapper.toItemDtoFull(item, null, null, getComments(item.getId())))
                     .collect(Collectors.toList());
         }
         userExistingCheck(userId);
@@ -94,13 +103,14 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(item -> ItemMapper.toItemDtoFull(item,
                         bookingRepository.getFirstByItemIdAndEndBeforeOrderByEnd(item.getId(), localDateTime),
-                        bookingRepository.getTopByItemIdAndStartAfterOrderByStart(item.getId(), localDateTime)))
+                        bookingRepository.getTopByItemIdAndStartAfterOrderByStart(item.getId(), localDateTime),
+                        getComments(item.getId())))
                 .collect(Collectors.toList());
     }
 
     public Collection<ItemDto> findItem(String text, Long userId) {
         if (text.isBlank()) {
-            return new ArrayList<ItemDto>();
+            return new ArrayList<>();
         }
         return itemRepository.findByNameOrDescriptionContainingIgnoreCase(text)
                 .stream()
@@ -108,14 +118,30 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    public CommentDtoFull addComment(CommentDto commentDto, long itemId, long userId) {
+        userExistingCheck(userId);
+        itemExistingCheck(itemId);
+        Booking booking = bookingRepository.findFirstByBookerId(userId);
+        if (booking != null && booking.getEnd().isBefore(LocalDateTime.now())) {
+            commentDto.setAuthor(userRepository.findById(userId).get().getId());
+            commentDto.setCreated(LocalDateTime.now());
+            Comment comment = CommentMapper.toComment(commentDto, itemRepository.findById(itemId).get(), userRepository.findById(userId).get());
+            comment = commentRepository.save(comment);
+            return CommentMapper.toCommentDtoFull(comment);
+        } else {
+            throw new WrongAccessException("Пользователь не брал предмет в аренду или срок аренды еще не истек");
+        }
+
+    }
+
     private void userExistingCheck(long id) {
-        if (userRepository.existsById(id) == false) {
+        if (!userRepository.existsById(id)) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
     }
 
     private void itemExistingCheck(long id) {
-        if (itemRepository.existsById(id) == false) {
+        if (!itemRepository.existsById(id)) {
             throw new NotFoundException("Предмет с id " + id + " не найден");
         }
     }
@@ -124,5 +150,12 @@ public class ItemServiceImpl implements ItemService {
         if (userIdFromItem != userIdFromRequest) {
             throw new WrongAccessException("Недостаточно прав для редактирования");
         }
+    }
+
+    private Set<CommentDtoFull> getComments(long itemId) {
+        return commentRepository.findAllByItemId(itemId)
+                .stream()
+                .map(CommentMapper::toCommentDtoFull)
+                .collect(Collectors.toSet());
     }
 }

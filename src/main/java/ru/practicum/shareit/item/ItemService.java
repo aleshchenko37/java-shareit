@@ -10,7 +10,7 @@ import java.util.Collection;
 public interface ItemService {
     ItemDto createItem(ItemDto dto, long userId);
 
-    ItemDto updateItem(ItemDto dto, long itemId,  long userId);
+    ItemDto updateItem(ItemDto dto, long itemId, long userId);
 
     ItemDtoFull getItemById(long id, Long userId);
 

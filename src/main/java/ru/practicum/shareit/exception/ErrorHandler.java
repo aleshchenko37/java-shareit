@@ -13,25 +13,25 @@ import java.util.Map;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Map<String,String>> handleNotFound(final NotFoundException e) {
+    public ResponseEntity<Map<String, String>> handleNotFound(final NotFoundException e) {
         return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Map<String,String>> handleBadRequest(final ValidationException e) {
+    public ResponseEntity<Map<String, String>> handleBadRequest(final ValidationException e) {
         return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<Map<String,String>> handleExistError(final WrongAccessException e) {
+    public ResponseEntity<Map<String, String>> handleExistError(final WrongAccessException e) {
         return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<Map<String,String>> handleExistError(final WrongStateException e) {
+    public ResponseEntity<Map<String, String>> handleExistError(final WrongStateException e) {
         return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

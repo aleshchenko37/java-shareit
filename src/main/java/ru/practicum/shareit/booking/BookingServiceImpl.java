@@ -133,12 +133,17 @@ public class BookingServiceImpl implements BookingService {
 
     private Predicate<Booking> getOperation(String state) {
         switch (state) {
-            case "CURRENT": return (booking) -> booking.getEnd().isAfter(LocalDateTime.now()) && booking.getStart().isBefore(LocalDateTime.now());
-            case "PAST": return (booking) -> booking.getEnd().isBefore(LocalDateTime.now());
-            case "FUTURE": return (booking) -> booking.getStart().isAfter(LocalDateTime.now());
-            case "WAITING": return (booking) -> booking.getStatus() == Status.WAITING;
-            case "REJECTED": return (booking) -> booking.getStatus() == Status.REJECTED;
-            default :
+            case "CURRENT":
+                return (booking) -> booking.getEnd().isAfter(LocalDateTime.now()) && booking.getStart().isBefore(LocalDateTime.now());
+            case "PAST":
+                return (booking) -> booking.getEnd().isBefore(LocalDateTime.now());
+            case "FUTURE":
+                return (booking) -> booking.getStart().isAfter(LocalDateTime.now());
+            case "WAITING":
+                return (booking) -> booking.getStatus() == Status.WAITING;
+            case "REJECTED":
+                return (booking) -> booking.getStatus() == Status.REJECTED;
+            default:
                 throw new WrongStateException("Unknown state: UNSUPPORTED_STATUS");
         }
     }

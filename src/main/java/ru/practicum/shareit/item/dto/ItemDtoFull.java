@@ -18,7 +18,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class ItemDtoFull {
     private Long id;
-    @NotBlank(groups = {New.class, ExistUpdateDescription.class, ExistUpdateNameEmailDescAvail.class, ExistUpdateAvailable.class}) // New.class - применимо для новых объектов Item
+    @NotBlank(groups = {New.class, ExistUpdateDescription.class, ExistUpdateNameEmailDescAvail.class, ExistUpdateAvailable.class})
+    // New.class - применимо для новых объектов Item
     private String name;
     @NotBlank(groups = {New.class, ExistUpdateName.class, ExistUpdateNameEmailDescAvail.class, ExistUpdateAvailable.class})
     private String description;

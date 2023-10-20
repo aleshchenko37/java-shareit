@@ -16,22 +16,22 @@ import java.util.Set;
 public class ItemMapper {
     public static Item toItem(ItemDto dto, User user) {
         return Item.builder()
-            .id(dto.getId())
-            .name(dto.getName())
-            .description(dto.getDescription())
-            .isAvailable(dto.getAvailable())
-            .user(user)
-            .build();
+                .id(dto.getId())
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .isAvailable(dto.getAvailable())
+                .user(user)
+                .build();
     }
 
     public static ItemDto toItemDto(Item item) {
         return ItemDto.builder()
-            .id(item.getId())
-            .name(item.getName())
-            .description(item.getDescription())
-            .available(item.getIsAvailable())
-            .userId(item.getUser().getId())
-            .build();
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getIsAvailable())
+                .userId(item.getUser().getId())
+                .build();
     }
 
     public static ItemDtoForBooking toItemDtoForBooking(Item item) {

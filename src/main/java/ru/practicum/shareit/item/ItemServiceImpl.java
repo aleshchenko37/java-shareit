@@ -77,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
         Set<CommentDtoFull> comments = getComments(itemId);
         if (userId != null && userId.equals(item.getUser().getId())) {
             userExistingCheck(userId);
-            Booking lastBooking = bookingRepository.getFirstByItemIdAndStatusNotAndEndBeforeOrderByEndDesc(itemId, Status.REJECTED, LocalDateTime.now());
+            Booking lastBooking = bookingRepository.getFirstByItemIdAndStatusNotAndStartBeforeOrderByEndDesc(itemId, Status.REJECTED, LocalDateTime.now());
             Booking nextBooking = bookingRepository.getFirstByItemIdAndStatusNotAndStartAfterOrderByStart(itemId, Status.REJECTED, LocalDateTime.now());
             return ItemMapper.toItemDtoFull(item, lastBooking, nextBooking, comments);
         } else return ItemMapper.toItemDtoFull(item, null, null, comments);

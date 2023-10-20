@@ -44,6 +44,10 @@ public class BookingServiceImpl implements BookingService {
         if (dto.getStart().isAfter(dto.getEnd()) || dto.getStart().isEqual(dto.getEnd())) {
             throw new WrongAccessException("Дата окончания букинга не может быть позднее даты начала");
         }
+        if (dto.getStart().isBefore(LocalDateTime.now()) || dto.getEnd().isBefore(LocalDateTime.now())
+                || dto.getEnd().equals(LocalDateTime.now())) {
+            throw new WrongAccessException("Дата не может быть в прошлом");
+        }
         dto.setBooker(userId);
         dto.setStatus(Status.WAITING);
         Booking booking = BookingMapper.toBooking(dto, itemRepository.findById(dto.getItemId()).get(), userRepository.findById(userId).get());

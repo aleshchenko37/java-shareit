@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @Builder
 public class UserDto {
+    private Long id;
     @NotBlank(groups = {New.class, ExistUpdateEmail.class}) // New.class - применимо для новых объектов User
     private String name;
     @NotBlank(groups = {New.class, ExistUpdateName.class})

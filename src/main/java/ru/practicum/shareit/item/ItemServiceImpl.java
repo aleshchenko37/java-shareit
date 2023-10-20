@@ -1,12 +1,17 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.WrongAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoFull;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -15,18 +20,20 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     UserRepository userRepository;
     ItemRepository itemRepository;
+    BookingRepository bookingRepository;
 
-    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository) {
+    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public ItemDto createItem(ItemDto dto, long userId) {
         userExistingCheck(userId);
         dto.setUserId(userId);
         Item item = ItemMapper.toItem(dto, userRepository.findById(userId).get());
-        itemRepository.save(item);
-        return dto;
+        item = itemRepository.save(item);
+        return ItemMapper.toItemDto(item);
     }
 
     public ItemDto updateItem(ItemDto dto, long itemId, long userId) {
@@ -56,10 +63,15 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.deleteById(itemId);
     }
 
-    public ItemDto getItemById(long itemId, Long userId) {
+    public ItemDtoFull getItemById(long itemId, Long userId) {
         itemExistingCheck(itemId);
         Item item = itemRepository.findById(itemId).get();
-        return ItemMapper.toItemDto(item);
+        if (userId == item.getUser().getId()) {
+            LocalDateTime localDateTime = LocalDateTime.now();
+            Booking lastBooking = bookingRepository.getFirstByItemIdAndStatusNotAndEndBeforeOrderByEnd(itemId, Status.REJECTED, localDateTime);
+            Booking nextBooking = bookingRepository.getTopByItemIdAndStatusNotAndStartAfterOrderByStart(itemId, Status.REJECTED, localDateTime);
+            return ItemMapper.toItemDtoFull(item, lastBooking, nextBooking);
+        } else return ItemMapper.toItemDtoFull(item, null, null);
     }
 
     public Collection<ItemDto> getAllItems() {
@@ -69,17 +81,20 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    public Collection<ItemDto> getAllUsersItems(Long userId) {
+    public Collection<ItemDtoFull> getAllUsersItems(Long userId) {
         if (userId == null) {
             return itemRepository.findAll()
                     .stream()
-                    .map(ItemMapper::toItemDto)
+                    .map(item -> ItemMapper.toItemDtoFull(item, null, null))
                     .collect(Collectors.toList());
         }
         userExistingCheck(userId);
+        LocalDateTime localDateTime = LocalDateTime.now();
         return itemRepository.findByUserId(userId)
                 .stream()
-                .map(ItemMapper::toItemDto)
+                .map(item -> ItemMapper.toItemDtoFull(item,
+                        bookingRepository.getFirstByItemIdAndEndBeforeOrderByEnd(item.getId(), localDateTime),
+                        bookingRepository.getTopByItemIdAndStartAfterOrderByStart(item.getId(), localDateTime)))
                 .collect(Collectors.toList());
     }
 

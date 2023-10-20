@@ -1,11 +1,12 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.model;
 
 import lombok.*;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter @Setter @ToString
 @Builder
@@ -19,9 +20,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "start_date", nullable = false)
-    private Instant start;
+    private LocalDateTime start;
     @Column(name = "end_date", nullable = false)
-    private Instant end;
+    private LocalDateTime end;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;

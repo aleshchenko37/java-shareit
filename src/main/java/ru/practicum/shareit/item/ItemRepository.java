@@ -11,8 +11,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query(value = "select * " +
             "from items " +
-            "where name ilike %:text% " +
-            "or description ilike %:text%", nativeQuery = true)
-    //TODO исправить запрос, работает, но ничего не находит
+            "where is_available = true " +
+            "and (name ilike %:text% " +
+            "or description ilike %:text%)",
+            nativeQuery = true)
     Set<Item> findByNameOrDescriptionContainingIgnoreCase(String text);
 }

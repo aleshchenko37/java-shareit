@@ -17,9 +17,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto createUser(UserDto dto) {
-        User user = UserMapper.toUser(dto);
-        repository.save(UserMapper.toUser(dto));
-        return dto;
+        //checkIfEmailIsUnique(dto.getEmail());
+        User user = repository.save(UserMapper.toUser(dto));
+        return UserMapper.toUserDto(user);
     }
 
     public UserDto updateUser(UserDto dto, long userId) {
@@ -54,4 +54,11 @@ public class UserServiceImpl implements UserService {
         User user = repository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден."));
         return UserMapper.toUserDto(user);
     }
+
+    /*public void checkIfEmailIsUnique(String email) {
+        Optional<User> user = repository.findByEmail(email);
+        if (user.isPresent()) {
+            throw new ValidationException("Пользователь с таким email уже зарегистрирован");
+        }
+    }*/
 }

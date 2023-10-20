@@ -72,11 +72,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDtoFull getItemById(long itemId, Long userId) {
-        userExistingCheck(userId);
         itemExistingCheck(itemId);
         Item item = itemRepository.findById(itemId).get();
         Set<CommentDtoFull> comments = getComments(itemId);
-        if (userId.equals(item.getUser().getId())) {
+        if (userId != null && userId.equals(item.getUser().getId())) {
+            userExistingCheck(userId);
             Booking lastBooking = bookingRepository.getFirstByItemIdAndStatusNotAndEndBeforeOrderByEndDesc(itemId, Status.REJECTED, LocalDateTime.now());
             Booking nextBooking = bookingRepository.getFirstByItemIdAndStatusNotAndStartAfterOrderByStart(itemId, Status.REJECTED, LocalDateTime.now());
             return ItemMapper.toItemDtoFull(item, lastBooking, nextBooking, comments);

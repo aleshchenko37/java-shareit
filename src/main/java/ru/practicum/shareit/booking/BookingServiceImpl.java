@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoFull;
 import ru.practicum.shareit.booking.model.Booking;
@@ -16,11 +16,11 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class BookingServiceImpl implements BookingService {
-    BookingRepository bookingRepository;
-    UserRepository userRepository;
-    ItemRepository itemRepository;
+    private BookingRepository bookingRepository;
+    private UserRepository userRepository;
+    private ItemRepository itemRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, ItemRepository itemRepository) {
         this.bookingRepository = bookingRepository;

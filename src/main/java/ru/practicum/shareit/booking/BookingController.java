@@ -10,7 +10,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    BookingService bookingService;
+    private BookingService bookingService;
 
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;

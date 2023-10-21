@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -22,12 +22,12 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class ItemServiceImpl implements ItemService {
-    UserRepository userRepository;
-    ItemRepository itemRepository;
-    BookingRepository bookingRepository;
-    CommentRepository commentRepository;
+    private UserRepository userRepository;
+    private ItemRepository itemRepository;
+    private BookingRepository bookingRepository;
+    private CommentRepository commentRepository;
 
     public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.userRepository = userRepository;

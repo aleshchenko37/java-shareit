@@ -16,4 +16,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "or description ilike %:text%)",
             nativeQuery = true)
     Set<Item> findByNameOrDescriptionContainingIgnoreCase(String text);
+
+    Set<Item> findByRequestId(long requestId);
 }

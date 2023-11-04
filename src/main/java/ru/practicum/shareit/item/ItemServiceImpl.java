@@ -14,6 +14,7 @@ import ru.practicum.shareit.exception.WrongAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoFull;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -28,18 +29,25 @@ public class ItemServiceImpl implements ItemService {
     private ItemRepository itemRepository;
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
+    private ItemRequestRepository itemRequestRepository;
 
-    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     public ItemDto createItem(ItemDto dto, long userId) {
         userExistingCheck(userId);
         dto.setUserId(userId);
-        Item item = ItemMapper.toItem(dto, userRepository.findById(userId).get());
+        Item item;
+        if (dto.getRequestId() != null) {
+            item = ItemMapper.toItem(dto, userRepository.findById(userId).get(), itemRequestRepository.findById(dto.getRequestId()).get());
+        } else {
+            item = ItemMapper.toItem(dto, userRepository.findById(userId).get(), null);
+        }
         item = itemRepository.save(item);
         return ItemMapper.toItemDto(item);
     }

@@ -63,20 +63,4 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
     }
-
-    /*@Test
-    public void updateUser() throws Exception {
-        when(userService.updateUser(userDto, 1L))
-                .thenReturn(userDto);
-
-        mvc.perform(patch("/users/{userId}")
-                        .content(mapper.writeValueAsString(userDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName())))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-    }*/
 }

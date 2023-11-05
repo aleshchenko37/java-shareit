@@ -8,10 +8,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -62,7 +66,7 @@ public class UserServiceTest {
         when(userRepository.save(ArgumentMatchers.any(User.class)))
                 .thenReturn(updateUser);
 
-        UserDto dto = userService.updateUser(userDto, 1L);
+        UserDto dto = userService.updateUser(UserMapper.toUserDto(updateUser), 1L);
         assertEquals(dto.getName(), updateUser.getName());
         assertEquals(dto.getEmail(), updateUser.getEmail());
         assertEquals(dto.getId(), updateUser.getId());
@@ -88,7 +92,7 @@ public class UserServiceTest {
         when(userRepository.findById(user.getId()))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> userService.getUserById(user.getId()));
+        Assertions.assertThrows(NotFoundException.class, () -> userService.getUserById(999L));
     }
 
     @Test

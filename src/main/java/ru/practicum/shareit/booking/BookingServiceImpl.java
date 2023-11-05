@@ -15,7 +15,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -89,7 +90,6 @@ public class BookingServiceImpl implements BookingService {
 
     public Collection<BookingDtoFull> getUsersBookings(String state, Integer from, Integer size, long userId) {
         checkUserId(userId);
-        Set<BookingDtoFull> bookingDtoFullSet = new HashSet<>();
         if (from >= 1) {
             from = from - 2;
         }
@@ -115,7 +115,6 @@ public class BookingServiceImpl implements BookingService {
         if (itemRepository.findByUserId(userId).size() == 0) {
             throw new NotFoundException("У пользователя с id " + userId + " нет вещей");
         }
-        List<BookingDtoFull> bookingDtoFullSet = new ArrayList<>();
         Pageable allBookings =
                 PageRequest.of(from, size, Sort.by("start").descending());
         List<Booking> bookings = bookingRepository.findByOwner(userId, allBookings);

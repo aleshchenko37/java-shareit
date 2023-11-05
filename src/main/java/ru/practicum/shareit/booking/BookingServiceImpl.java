@@ -1,5 +1,8 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoFull;
@@ -12,7 +15,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -29,9 +32,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public BookingDtoFull createBooking(BookingDto dto, long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        checkUserId(userId);
         if (!itemRepository.existsById(dto.getItemId())) {
             throw new NotFoundException("Предмет с id " + dto.getItemId() + " не найден");
         }
@@ -53,9 +54,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public BookingDtoFull confirmBooking(long bookingId, boolean approved, long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        checkUserId(userId);
         if (!bookingRepository.existsById(bookingId)) {
             throw new NotFoundException("Букинг с id " + bookingId + " не найден");
         }
@@ -77,9 +76,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public BookingDtoFull getBooking(long bookingId, long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
         if (bookingRepository.existsById(bookingId) == false) {
             throw new NotFoundException("Букинг с id " + bookingId + " не найден");
         }
@@ -91,17 +87,22 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    public Collection<BookingDtoFull> getUsersBookings(String state, long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+    public Collection<BookingDtoFull> getUsersBookings(String state, Integer from, Integer size, long userId) {
+        checkUserId(userId);
+        Set<BookingDtoFull> bookingDtoFullSet = new HashSet<>();
+        if (from >= 1) {
+            from = from - 2;
         }
+        Pageable allBookings =
+                PageRequest.of(from, size, Sort.by("start").descending());
+        List<Booking> bookings = bookingRepository.findAllByBookerId(userId, allBookings);
         if (state.equals("ALL")) {
-            return bookingRepository.findAllByBookerIdOrderByStartDesc(userId)
+            return bookings
                     .stream()
                     .map(booking -> BookingMapper.toBookingDtoFull(booking, itemRepository.findById(booking.getItem().getId()).get()))
                     .collect(Collectors.toList());
         } else {
-            return bookingRepository.findAllByBookerIdOrderByStartDesc(userId)
+            return bookings
                     .stream()
                     .filter(getOperation(state))
                     .map(booking -> BookingMapper.toBookingDtoFull(booking, itemRepository.findById(booking.getItem().getId()).get()))
@@ -109,27 +110,28 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    public Collection<BookingDtoFull> getUsersItemsBookings(String state, long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+    public Collection<BookingDtoFull> getUsersItemsBookings(String state, Integer from, Integer size, long userId) {
+        checkUserId(userId);
         if (itemRepository.findByUserId(userId).size() == 0) {
             throw new NotFoundException("У пользователя с id " + userId + " нет вещей");
         }
+        List<BookingDtoFull> bookingDtoFullSet = new ArrayList<>();
+        Pageable allBookings =
+                PageRequest.of(from, size, Sort.by("start").descending());
+        List<Booking> bookings = bookingRepository.findByOwner(userId, allBookings);
         if (state.equals("ALL")) {
-            return bookingRepository.findByOwnerSortByStart(userId)
+            return bookings
                     .stream()
                     .map(booking -> BookingMapper.toBookingDtoFull(booking, itemRepository.findById(booking.getItem().getId()).get()))
                     .collect(Collectors.toList());
         } else {
-            return bookingRepository.findByOwnerSortByStart(userId)
+            return bookings
                     .stream()
                     .filter(getOperation(state))
                     .map(booking -> BookingMapper.toBookingDtoFull(booking, itemRepository.findById(booking.getItem().getId()).get()))
                     .collect(Collectors.toList());
         }
     }
-
 
     private Predicate<Booking> getOperation(String state) {
         switch (state) {

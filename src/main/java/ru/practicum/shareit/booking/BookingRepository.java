@@ -1,17 +1,18 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
-public interface BookingRepository extends JpaRepository<Booking, Long> {
-    Set<Booking> findAllByBookerIdOrderByStartDesc(long userId);
+public interface BookingRepository extends PagingAndSortingRepository<Booking, Long> {
+    List<Booking> findAllByBookerIdOrderByStartDesc(long userId);
 
     @Query("select b FROM Booking as b join Item as i on b.item = i WHERE i.user.id = :userId ORDER BY b.start DESC")
-    Set<Booking> findByOwnerSortByStart(long userId);
+    List<Booking> findByOwnerSortByStart(long userId);
 
     Booking getFirstByItemIdAndEndBeforeOrderByEnd(long itemId, LocalDateTime date);
 
@@ -22,4 +23,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Booking getFirstByItemIdAndStatusNotAndStartAfterOrderByStart(long itemId, Status status, LocalDateTime date);
 
     Booking findFirstByBookerId(long userId);
+
+    List<Booking> findAllByBookerId(long userId, Pageable pageable);
+
+    @Query("select b FROM Booking as b join Item as i on b.item = i WHERE i.user.id = :userId")
+    List<Booking> findByOwner(long userId, Pageable pageable);
 }

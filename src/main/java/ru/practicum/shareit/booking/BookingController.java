@@ -5,6 +5,8 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoFull;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.Collection;
 
 @RestController
@@ -32,12 +34,14 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingDtoFull> getUsersBookings(@RequestParam(required = false, defaultValue = "ALL") String state, @RequestHeader("X-Sharer-User-Id") long userId) {
-        return bookingService.getUsersBookings(state, userId);
+    public Collection<BookingDtoFull> getUsersBookings(@RequestParam(required = false, defaultValue = "ALL") String state, @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                                 @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size, @RequestHeader("X-Sharer-User-Id") long userId) {
+        return bookingService.getUsersBookings(state, from, size, userId);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDtoFull> getUsersItemsBookings(@RequestParam(required = false, defaultValue = "ALL") String state, @RequestHeader("X-Sharer-User-Id") long userId) {
-        return bookingService.getUsersItemsBookings(state, userId);
+    public Collection<BookingDtoFull> getUsersItemsBookings(@RequestParam(required = false, defaultValue = "ALL") String state, @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                                            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size, @RequestHeader("X-Sharer-User-Id") long userId) {
+        return bookingService.getUsersItemsBookings(state, from, size, userId);
     }
 }

@@ -57,7 +57,7 @@ public class BookingServiceImplTest {
         Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
         Mockito.when(bookingRepository.save(Mockito.any())).thenReturn(booking);
 
-        BookingDtoFull bookingSaved = bookingService.createBooking(dto, 2l);
+        BookingDtoFull bookingSaved = bookingService.createBooking(dto, 2L);
 
         assertThat(bookingSaved.getId(), notNullValue());
         assertThat(bookingSaved.getStart(), equalTo(dto.getStart()));
@@ -71,7 +71,6 @@ public class BookingServiceImplTest {
         User user = new User(1L,"Anastasiya","ana@mail.ru");
         Item item = new Item(1L, "item", "description", true, user, new ItemRequest());
         Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, user, Status.WAITING);
-        BookingDtoFull dto = new BookingDtoFull(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), ItemMapper.toItemDtoForBooking(item), UserMapper.toUserDtoForBooking(user), Status.WAITING);
 
         Mockito.when(bookingRepository.existsById(Mockito.anyLong())).thenReturn(true);
         Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));

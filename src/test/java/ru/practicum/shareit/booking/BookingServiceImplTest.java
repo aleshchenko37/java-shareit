@@ -19,7 +19,10 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -54,7 +57,7 @@ public class BookingServiceImplTest {
         Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
         Mockito.when(bookingRepository.save(Mockito.any())).thenReturn(booking);
 
-        BookingDtoFull bookingSaved = bookingService.createBooking(dto, 2L);
+        BookingDtoFull bookingSaved = bookingService.createBooking(dto, 2l);
 
         assertThat(bookingSaved.getId(), notNullValue());
         assertThat(bookingSaved.getStart(), equalTo(dto.getStart()));
@@ -65,7 +68,7 @@ public class BookingServiceImplTest {
 
     @Test
     public void getBooking() {
-        User user = new User(1L, "Anastasiya", "ana@mail.ru");
+        User user = new User(1L,"Anastasiya","ana@mail.ru");
         Item item = new Item(1L, "item", "description", true, user, new ItemRequest());
         Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, user, Status.WAITING);
         BookingDtoFull dto = new BookingDtoFull(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), ItemMapper.toItemDtoForBooking(item), UserMapper.toUserDtoForBooking(user), Status.WAITING);
@@ -73,13 +76,13 @@ public class BookingServiceImplTest {
         Mockito.when(bookingRepository.existsById(Mockito.anyLong())).thenReturn(true);
         Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));
 
-        assertThat(bookingService.getBooking(1L, 1L), equalTo(BookingMapper.toBookingDtoFull(booking, item)));
+        assertThat(bookingService.getBooking(1L, 1L),equalTo(BookingMapper.toBookingDtoFull(booking, item)));
     }
 
     @Test
     public void getBookingThrowsException() {
-        User owner = new User(1L, "Anastasiya", "ana@mail.ru");
-        User renter = new User(2L, "notAnastasiya", "notAna@mail.ru");
+        User owner = new User(1L,"Anastasiya","ana@mail.ru");
+        User renter = new User(2L,"notAnastasiya","notAna@mail.ru");
         Item item = new Item(1L, "test", "test", true, owner, new ItemRequest());
         Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, renter, Status.WAITING);
 
@@ -87,5 +90,57 @@ public class BookingServiceImplTest {
         Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));
 
         assertThrows(NotFoundException.class, () -> bookingService.getBooking(1L, 3L));
+    }
+
+    @Test
+    public void confirmBooking() {
+        User user = new User(1L,"Anastasiya","ana@mail.ru");
+        Item item = new Item(1L, "item", "description", true, user, new ItemRequest());
+        Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, user, Status.WAITING);
+        Booking bookingApproved = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, user, Status.APPROVED);
+
+        Mockito.when(userRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        Mockito.when(bookingRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        Mockito.when(bookingRepository.save(Mockito.any())).thenReturn(bookingApproved);
+        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
+        Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));
+
+        BookingDtoFull approvedBookingDto = bookingService.confirmBooking(1L, true, 1L);
+
+        assertThat(approvedBookingDto.getStatus(),equalTo(Status.APPROVED));
+    }
+
+    @Test
+    public void getUsersBookings() {
+        User user = new User(1L,"Anastasiya","ana@mail.ru");
+        Item item = new Item(1L, "item", "description", true, user, new ItemRequest());
+        Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, user, Status.WAITING);
+        List<Booking> bookingList = List.of(booking);
+
+        Mockito.when(userRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
+        Mockito.when(bookingRepository.findAllByBookerId(Mockito.anyLong(), Mockito.any())).thenReturn(bookingList);
+
+        Collection<BookingDtoFull> bookings = bookingService.getUsersBookings("ALL", 0, 2, 1L);
+
+        assertThat(bookings.size(),equalTo(1));
+    }
+
+    @Test
+    public void getUsersItemsBookings() {
+        User owner = new User(1L,"Anastasiya","ana@mail.ru");
+        User booker = new User(2L,"notAnastasiya","notAna@mail.ru");
+        Item item = new Item(1L, "item", "description", true, owner, new ItemRequest());
+        Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, booker, Status.WAITING);
+        Set<Item> itemList = Set.of(item);
+        List<Booking> bookingList = List.of(booking);
+
+        Mockito.when(userRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
+        Mockito.when(itemRepository.findByUserId(Mockito.anyLong())).thenReturn(itemList);
+        Mockito.when(bookingRepository.findByOwner(Mockito.anyLong(), Mockito.any())).thenReturn(bookingList);
+
+        Collection<BookingDtoFull> bookings = bookingService.getUsersItemsBookings("ALL", 0, 2, 1L);
+        assertThat(bookings.size(),equalTo(1));
     }
 }

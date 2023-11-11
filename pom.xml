@@ -194,6 +194,7 @@
 					<configuration>
 						<excludes>
 							<exclude>ru/practicum/**/model/**</exclude>
+							<exclude>ru/practicum/**/service/**</exclude>
 						</excludes>
 						<output>file</output>
 					</configuration>

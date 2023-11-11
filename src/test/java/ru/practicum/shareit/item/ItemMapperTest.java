@@ -2,18 +2,19 @@ package ru.practicum.shareit.item;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.util.Status;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForBooking;
 import ru.practicum.shareit.item.dto.ItemDtoForRequest;
 import ru.practicum.shareit.item.dto.ItemDtoFull;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class ItemMapperTest {
     private final User user = new User(1L, "test", "rest@mail.ru");
@@ -57,7 +58,7 @@ public class ItemMapperTest {
     @Test
     void toItemDtoFullIfBookingsNull() {
         Item item = new Item(1L, "test", "test", true, user, new ItemRequest(1L, "test", LocalDateTime.now(), user));
-        ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, null, null, new HashSet<>());
+        ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, null, null, new ArrayList<>());
 
         Assertions.assertEquals(itemDtoFull.getId(), item.getId());
         Assertions.assertEquals(itemDtoFull.getName(), item.getName());
@@ -72,7 +73,7 @@ public class ItemMapperTest {
         Item item = new Item(1L, "test", "test", true, user, new ItemRequest(1L, "test", LocalDateTime.now(), user));
         Booking lastBooking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), item, user, Status.WAITING);
         Booking nextBooking = new Booking(2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), item, user, Status.WAITING);
-        ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, lastBooking, nextBooking, new HashSet<>());
+        ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, lastBooking, nextBooking, new ArrayList<>());
 
         Assertions.assertEquals(itemDtoFull.getId(), item.getId());
         Assertions.assertEquals(itemDtoFull.getName(), item.getName());

@@ -18,7 +18,9 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,4 +67,27 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
     }
+
+    @Test
+    void updateUser() throws Exception {
+        Long userId = 0L;
+        UserDto newUser = new UserDto();
+        newUser.setName("2");
+        newUser.setEmail("2@mail.ru");
+        when(userService.updateUser(any(), anyLong())).thenReturn(newUser);
+
+        UserDto updatedUser = controller.updateUser(newUser, userId);
+
+        mvc.perform(patch("/users/{userId}", userId)
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(updatedUser.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(updatedUser.getName())))
+                .andExpect(jsonPath("$.email", is(updatedUser.getEmail())));
+    }
+
+
 }

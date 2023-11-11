@@ -189,7 +189,6 @@
 						<excludes>
 							<exclude>ru/practicum/**/model/**</exclude>
 							<exclude>ru.practicum.shareit.util/**</exclude>
-							<exclude>ru.practicum.shareit.util/**</exclude>
 							<exclude>ru/practicum/**/service/**</exclude>
 						</excludes>
 						<output>file</output>

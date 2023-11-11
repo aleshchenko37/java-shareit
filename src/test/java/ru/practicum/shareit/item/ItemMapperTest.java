@@ -56,7 +56,7 @@ public class ItemMapperTest {
     }
 
     @Test
-    void toItemDtoFullIfBookingsNull() {
+    void toItemDtoFullIfBothBookingsNull() {
         Item item = new Item(1L, "test", "test", true, user, new ItemRequest(1L, "test", LocalDateTime.now(), user));
         ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, null, null, new ArrayList<>());
 
@@ -69,20 +69,27 @@ public class ItemMapperTest {
     }
 
     @Test
-    void toItemDtoFullIfBookingsNotNull() {
+    void toItemDtoFullIfNextBookingIsNotNull() {
         Item item = new Item(1L, "test", "test", true, user, new ItemRequest(1L, "test", LocalDateTime.now(), user));
         Booking lastBooking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), item, user, Status.WAITING);
-        Booking nextBooking = new Booking(2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), item, user, Status.WAITING);
+        ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, lastBooking, null, new ArrayList<>());
+
+        Assertions.assertEquals(itemDtoFull.getLastBooking().getId(), lastBooking.getId());
+        Assertions.assertEquals(itemDtoFull.getLastBooking().getBookerId(), lastBooking.getBooker().getId());
+        Assertions.assertEquals(itemDtoFull.getNextBooking(), null);
+
+    }
+
+    @Test
+    void toItemDtoFullIfLastBookingsEqualsNextBooking() {
+        Item item = new Item(1L, "test", "test", true, user, new ItemRequest(1L, "test", LocalDateTime.now(), user));
+        Booking lastBooking = new Booking(2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), item, user, Status.WAITING);
+        Booking nextBooking = lastBooking;
         ItemDtoFull itemDtoFull = ItemMapper.toItemDtoFull(item, lastBooking, nextBooking, new ArrayList<>());
 
-        Assertions.assertEquals(itemDtoFull.getId(), item.getId());
-        Assertions.assertEquals(itemDtoFull.getName(), item.getName());
-        Assertions.assertEquals(itemDtoFull.getDescription(), item.getDescription());
-        Assertions.assertEquals(itemDtoFull.getDescription(), item.getDescription());
-        Assertions.assertEquals(itemDtoFull.getAvailable(), item.getIsAvailable());
-        Assertions.assertEquals(itemDtoFull.getUserId(), item.getUser().getId());
         Assertions.assertEquals(itemDtoFull.getLastBooking().getId(), lastBooking.getId());
-        Assertions.assertEquals(itemDtoFull.getNextBooking().getId(), nextBooking.getId());
+        Assertions.assertEquals(itemDtoFull.getLastBooking().getBookerId(), lastBooking.getBooker().getId());
+        Assertions.assertEquals(itemDtoFull.getNextBooking(), null);
     }
 
     @Test

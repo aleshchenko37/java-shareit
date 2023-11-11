@@ -86,7 +86,7 @@ public class ItemMapperTest {
     }
 
     @Test
-    void toItemDtoForRequest() {
+    void toItemDtoForRequestIfRequestIsNull() {
         Item item = new Item(1L, "test", "test", true, user, null);
         ItemDtoForRequest itemDtoForRequest = ItemMapper.toItemDtoForRequest(item);
 
@@ -95,5 +95,14 @@ public class ItemMapperTest {
         Assertions.assertEquals(itemDtoForRequest.getDescription(), item.getDescription());
         Assertions.assertEquals(itemDtoForRequest.getDescription(), item.getDescription());
         Assertions.assertEquals(itemDtoForRequest.getAvailable(), item.getIsAvailable());
+    }
+
+    @Test
+    void toItemDtoForRequestIfRequestIsNotNull() {
+        ItemRequest itemRequest = new ItemRequest(1L, "test", LocalDateTime.now(), user);
+        Item item = new Item(1L, "test", "test", true, user, itemRequest);
+        ItemDtoForRequest itemDtoForRequest = ItemMapper.toItemDtoForRequest(item);
+
+        Assertions.assertEquals(itemDtoForRequest.getRequestId(), item.getRequest().getId());
     }
 }

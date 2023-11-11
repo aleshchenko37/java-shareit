@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -46,7 +47,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(userId)
                 .stream()
                 .map(itemRequest -> ItemRequestMapper.toItemRequestDtoFull(itemRequest, itemRepository.findByRequestId(itemRequest.getId())))
-                .collect(toSet());
+                .collect(toList());
     }
 
     public Collection<ItemRequestDtoFull> getAllRequests(Long userId, Integer from, Integer size) {

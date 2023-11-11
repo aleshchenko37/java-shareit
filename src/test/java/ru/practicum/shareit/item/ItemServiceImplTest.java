@@ -23,7 +23,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -124,7 +127,7 @@ public class ItemServiceImplTest {
         List<Item> expectedItems = List.of(item);
 
         when(userRepository.existsById(anyLong())).thenReturn(true);
-        when(itemRepository.findByUserId(anyLong())).thenReturn(new HashSet<>(expectedItems));
+        when(itemRepository.findByUserId(anyLong())).thenReturn(expectedItems);
         when(bookingRepository.getFirstByItemIdAndEndBeforeOrderByEnd(anyLong(), any())).thenReturn(booking);
         when(bookingRepository.getTopByItemIdAndStartAfterOrderByStart(anyLong(), any())).thenReturn(null);
 

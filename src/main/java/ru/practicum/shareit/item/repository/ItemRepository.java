@@ -4,10 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Set;
+import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    Set<Item> findByUserId(long userId);
+    List<Item> findByUserId(long userId);
 
     @Query(value = "select * " +
             "from items " +
@@ -15,7 +15,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "and (name ilike %:text% " +
             "or description ilike %:text%)",
             nativeQuery = true)
-    Set<Item> findByNameOrDescriptionContainingIgnoreCase(String text);
+    List<Item> findByNameOrDescriptionContainingIgnoreCase(String text);
 
-    Set<Item> findByRequestId(long requestId);
+    List<Item> findByRequestId(long requestId);
 }

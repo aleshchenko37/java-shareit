@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -135,7 +134,7 @@ public class BookingServiceImplTest {
         User booker = new User(2L,"notAnastasiya","notAna@mail.ru");
         Item item = new Item(1L, "item", "description", true, owner, new ItemRequest());
         Booking booking = new Booking(1L, LocalDateTime.of(2023, 11, 6, 23, 30), LocalDateTime.of(2023, 11, 6, 23, 50), item, booker, Status.WAITING);
-        Set<Item> itemList = Set.of(item);
+        List<Item> itemList = List.of(item);
         List<Booking> bookingList = List.of(booking);
 
         Mockito.when(userRepository.existsById(Mockito.anyLong())).thenReturn(true);

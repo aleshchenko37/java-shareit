@@ -8,8 +8,8 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoFull;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ItemRequestMapper {
@@ -32,13 +32,13 @@ public class ItemRequestMapper {
                 .build();
     }
 
-    public static ItemRequestDtoFull toItemRequestDtoFull(ItemRequest itemRequest, Set<Item> items) {
-        Set<ItemDtoForRequest> requestsItemsSet = new HashSet<>();
+    public static ItemRequestDtoFull toItemRequestDtoFull(ItemRequest itemRequest, List<Item> items) {
+        List<ItemDtoForRequest> requestsItemsSet = new ArrayList<>();
         if (items != null) {
             requestsItemsSet = items
                     .stream()
                     .map(ItemMapper::toItemDtoForRequest)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         }
 
         return ItemRequestDtoFull.builder()

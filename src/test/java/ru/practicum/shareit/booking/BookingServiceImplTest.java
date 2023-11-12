@@ -31,6 +31,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceImplTest {
@@ -67,6 +69,11 @@ public class BookingServiceImplTest {
         assertThat(bookingSaved.getEnd(), equalTo(dto.getEnd()));
         assertThat(bookingSaved.getItem(), equalTo(ItemMapper.toItemDtoForBooking(item)));
         assertThat(bookingSaved.getBooker(), equalTo(UserMapper.toUserDtoForBooking(booker)));
+
+        Mockito.verify(userRepository, atLeast(1)).existsById(2L);
+        Mockito.verify(userRepository, atLeast(1)).findById(2L);
+        Mockito.verify(itemRepository, times(1)).existsById(1L);
+        Mockito.verify(itemRepository, times(4)).findById(1L);
     }
 
     @Test
@@ -79,6 +86,9 @@ public class BookingServiceImplTest {
         Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));
 
         assertThat(bookingService.getBooking(1L, 1L),equalTo(BookingMapper.toBookingDtoFull(booking, item)));
+
+        Mockito.verify(bookingRepository, times(1)).existsById(1L);
+        Mockito.verify(bookingRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -92,6 +102,9 @@ public class BookingServiceImplTest {
         Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));
 
         assertThrows(NotFoundException.class, () -> bookingService.getBooking(1L, 3L));
+
+        Mockito.verify(bookingRepository, times(1)).existsById(1L);
+        Mockito.verify(bookingRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -110,6 +123,12 @@ public class BookingServiceImplTest {
         BookingDtoFull approvedBookingDto = bookingService.confirmBooking(1L, true, 1L);
 
         assertThat(approvedBookingDto.getStatus(),equalTo(Status.APPROVED));
+
+        Mockito.verify(userRepository, times(1)).existsById(1L);
+        Mockito.verify(bookingRepository, times(1)).existsById(1L);
+        Mockito.verify(bookingRepository, times(1)).save(booking);
+        Mockito.verify(itemRepository, times(1)).findById(1L);
+        Mockito.verify(bookingRepository, times(1)).findById(1L);
     }
 
     @Test

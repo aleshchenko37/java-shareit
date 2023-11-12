@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.request.controller.ItemRequestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -37,6 +39,7 @@ class ItemRequestControllerTest {
         ItemRequestDto itemRequestDto1 = itemRequestController.createItemRequest(1L, itemRequestDto);
         assertEquals(Objects.requireNonNull(itemRequestDto1).getId(), itemRequestDto.getId());
 
+        Mockito.verify(itemRequestService, times(1)).createItemRequest(user.getId(), itemRequestDto);
     }
 
     @Test
@@ -47,5 +50,7 @@ class ItemRequestControllerTest {
 
         Collection<ItemRequestDtoFull> list = itemRequestController.getAllUsersRequest(1L);
         assertEquals(1, Objects.requireNonNull(list).size());
+
+        Mockito.verify(itemRequestService, times(1)).getAllUsersRequests(1L);
     }
 }

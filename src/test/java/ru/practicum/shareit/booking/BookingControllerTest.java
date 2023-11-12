@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +48,8 @@ class BookingControllerTest {
 
         BookingDtoFull bookingDtoFull = bookingController.createBooking(bookingDto1, 1L);
         assertThat(Objects.requireNonNull(bookingDto1.getId())).isEqualTo(1);
+
+        Mockito.verify(bookingService, times(1)).createBooking(bookingDto1, 1L);
     }
 
     @Test
@@ -55,6 +59,8 @@ class BookingControllerTest {
 
         BookingDtoFull bookingDtoFull = bookingController.confirmBooking(1L, true, 1L);
         assertThat(Objects.requireNonNull(bookingDtoFull).getStatus()).isEqualTo(Status.APPROVED);
+
+        Mockito.verify(bookingService, times(1)).confirmBooking(1L, true, 1L);
     }
 
     @Test
@@ -64,6 +70,8 @@ class BookingControllerTest {
 
         BookingDtoFull bookingDtoFull = bookingController.getBooking(1L, 1L);
         assertThat(Objects.requireNonNull(bookingDtoFull.getId())).isEqualTo(1);
+
+        Mockito.verify(bookingService, times(1)).getBooking(1L, 1L);
     }
 
     @Test
@@ -74,5 +82,7 @@ class BookingControllerTest {
 
         Collection<BookingDtoFull> bookingDtos = bookingController.getUsersBookings("ALL", 0, 5, 1L);
         assertThat(Objects.requireNonNull(bookingDtos.size())).isEqualTo(1);
+
+        Mockito.verify(bookingService, times(1)).getUsersBookings("ALL", 0, 5, 1L);
     }
 }

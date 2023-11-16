@@ -10,7 +10,7 @@ import ru.practicum.shareit.transfer.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -28,6 +28,5 @@ public class ItemDtoFull {
     private Long userId;
     private BookingDtoForItem lastBooking;
     private BookingDtoForItem nextBooking;
-    Set<CommentDtoFull> comments;
-
+    List<CommentDtoFull> comments;
 }

@@ -9,6 +9,11 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByUserId(long userId);
 
+    @Query(value = "select * " +
+            "from items " +
+            "where owner_id = ? " +
+            "order by id)",
+            nativeQuery = true)
     List<Item> findByUserIdOrderById(long userId);
 
     @Query(value = "select * " +

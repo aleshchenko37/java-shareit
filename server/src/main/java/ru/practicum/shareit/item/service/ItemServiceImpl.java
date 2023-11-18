@@ -109,7 +109,7 @@ public class ItemServiceImpl implements ItemService {
         }
         userExistingCheck(userId);
         LocalDateTime localDateTime = LocalDateTime.now();
-        return itemRepository.findByUserIdOrderById(userId)
+        return itemRepository.findByUserId(userId)
                 .stream()
                 .map(item -> ItemMapper.toItemDtoFull(item,
                         bookingRepository.getFirstByItemIdAndEndBeforeOrderByEnd(item.getId(), localDateTime),

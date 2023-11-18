@@ -11,13 +11,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query(value = "select * " +
             "from items " +
-            "where owner_id = ? " +
-            "order by id)",
-            nativeQuery = true)
-    List<Item> findByUserIdOrderById(long userId);
-
-    @Query(value = "select * " +
-            "from items " +
             "where is_available = true " +
             "and (name ilike %:text% " +
             "or description ilike %:text%)",

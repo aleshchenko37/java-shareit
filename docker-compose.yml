@@ -23,7 +23,7 @@ services:
       - db
     restart: on-failure
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/test
 
   db:
     image: postgres:13.7-alpine
@@ -33,6 +33,6 @@ services:
     ports:
       - "6541:5432"
     environment:
-      - POSTGRES_DB=shareit
-      - POSTGRES_USER=shareit
-      - POSTGRES_PASSWORD=shareit
+      - POSTGRES_DB=test
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test

@@ -115,7 +115,7 @@ public class ItemServiceImplTest {
         verify(itemRepository, never()).findById(anyLong());
         verify(commentRepository, never()).findAllByItemId(anyLong());
         verify(itemRepository, times(1))
-                .findByUserId(anyLong());
+                .findByUserIdOrderById(anyLong());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ItemServiceImplTest {
         List<Item> expectedItems = List.of(item);
 
         when(userRepository.existsById(anyLong())).thenReturn(true);
-        when(itemRepository.findByUserId(anyLong())).thenReturn(expectedItems);
+        when(itemRepository.findByUserIdOrderById(anyLong())).thenReturn(expectedItems);
         when(bookingRepository.getFirstByItemIdAndEndBeforeOrderByEnd(anyLong(), any())).thenReturn(booking);
         when(bookingRepository.getTopByItemIdAndStartAfterOrderByStart(anyLong(), any())).thenReturn(null);
 
@@ -142,7 +142,7 @@ public class ItemServiceImplTest {
 
         InOrder inOrder = inOrder(itemRepository, commentRepository);
         inOrder.verify(itemRepository, times(1))
-                .findByUserId(anyLong());
+                .findByUserIdOrderById(anyLong());
         inOrder.verify(commentRepository, times(1)).findAllByItemId(anyLong());
     }
 

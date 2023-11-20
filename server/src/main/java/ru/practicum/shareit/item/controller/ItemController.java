@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.transfer.Exist;
 import ru.practicum.shareit.transfer.New;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -48,7 +47,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDtoFull addComment(@RequestBody @Valid CommentDto commentDto, @PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public CommentDtoFull addComment(@RequestBody CommentDto commentDto, @PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.addComment(commentDto, itemId, userId);
     }
 }
